@@ -138,9 +138,15 @@
 
   <div id="viewer">
     <canvas id="canvas"></canvas>
-  </div>
+  
+    <div id="backButton" onclick="goBack()" style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; z-index: 20;"></div>
 
   <script>
+    function goBack() {
+      document.getElementById("viewer").style.display = "none";
+      document.getElementById("config").style.display = "block";
+    }
+
     function generate() {
       const bgColor = document.getElementById("bgColor").value;
       const cols = parseInt(document.getElementById("cols").value);
