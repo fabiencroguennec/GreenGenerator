@@ -3,67 +3,104 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Générateur de croix</title>
+  <title>Générateur de croix - Grille</title>
   <style>
     body, html {
-      margin: 0; padding: 0; height: 100%;
+      margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: 'Segoe UI', sans-serif;
-      background: black; color: white;
+      background: black;
+      color: white;
       overflow: hidden;
     }
 
     #config {
-      position: absolute; top: 50%; left: 50%;
+      position: absolute;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       background: rgba(255,255,255,0.05);
       backdrop-filter: blur(10px);
       border-radius: 16px;
-      padding: 30px; width: 90%; max-width: 500px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
       box-shadow: 0 0 15px rgba(0,0,0,0.5);
       z-index: 10;
     }
 
-    h1 { text-align: center; }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-    .option-label { margin: 15px 0 5px; font-weight: bold; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+      gap: 2px;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      background: #333;
+      border-radius: 3px;
+      transition: background 0.2s;
+    }
+
+    .cell.selected {
+      background: #04F404;
+    }
+
+    .option-label {
+      margin-top: 10px;
+      font-weight: bold;
+    }
 
     .color-options {
-      display: flex; gap: 10px; margin-bottom: 10px;
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
     }
 
     .color-button {
-      width: 40px; height: 40px; border-radius: 50%;
-      border: 2px solid white; cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
     }
 
     .color-button.selected {
-      box-shadow: 0 0 0 3px white; transform: scale(1.1);
+      box-shadow: 0 0 0 3px white;
+      transform: scale(1.1);
     }
 
-    select, button {
-      width: 100%; padding: 10px; margin-top: 10px;
-      font-size: 16px; border: none; border-radius: 8px;
-      background: #222; color: white;
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+      margin-top: 20px;
     }
 
     #viewer {
-      position: absolute; top: 0; left: 0;
+      position: absolute;
+      top: 0; left: 0;
       width: 100%; height: 100%;
-      display: none; touch-action: none;
+      display: none;
+      touch-action: none;
     }
 
     canvas {
       display: block;
       width: 100%;
       height: 100%;
-      pointer-events: none;
-    }
-
-    #backButton {
-      position: absolute; top: 0; right: 0;
-      width: 100px; height: 100px;
-      z-index: 20;
-      pointer-events: auto;
     }
   </style>
 </head>
@@ -71,6 +108,16 @@
 
   <div id="config">
     <h1>Générateur de Croix</h1>
+
+    <div class="option-label">Sélection lignes × colonnes :</div>
+    <div class="grid" id="grid"></div>
+
+    <div class="option-label">Épaisseur :</div>
+    <div class="color-options" id="thicknessOptions">
+      <div class="color-button selected" style="background:#777;" data-value="0.3"></div>
+      <div class="color-button" style="background:#aaa;" data-value="0.6"></div>
+      <div class="color-button" style="background:#fff;" data-value="1.0"></div>
+    </div>
 
     <div class="option-label">Couleur de fond :</div>
     <div class="color-options" id="bgColorOptions">
@@ -86,32 +133,53 @@
       <div class="color-button" style="background:#04F404;" data-value="#04F404"></div>
     </div>
 
-    <label for="cols">Colonnes :</label>
-    <select id="cols"><option>1</option><option>2</option><option>3</option><option>4</option>
-      <option>5</option><option>6</option><option>7</option><option>8</option></select>
-
-    <label for="rows">Lignes :</label>
-    <select id="rows"><option>1</option><option>2</option><option>3</option><option>4</option>
-      <option>5</option><option>6</option><option>7</option><option>8</option></select>
-
-    <label for="thickness">Épaisseur :</label>
-    <select id="thickness">
-      <option value="0.5">Fine</option>
-      <option value="1" selected>Normale</option>
-      <option value="1.5">Large</option>
-    </select>
-
     <button onclick="generate()">Afficher</button>
   </div>
 
   <div id="viewer">
     <canvas id="canvas"></canvas>
-    <div id="backButton" onclick="goBack()"></div>
   </div>
 
   <script>
+    const grid = document.getElementById("grid");
+    let selectedCols = 1;
+    let selectedRows = 1;
     let bgColor = "#000000";
     let crossColor = "white";
+
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 10; c++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.row = r + 1;
+        cell.dataset.col = c + 1;
+        cell.addEventListener("mouseover", () => highlightGrid(r + 1, c + 1));
+        cell.addEventListener("click", () => {
+          selectedRows = r + 1;
+          selectedCols = c + 1;
+        });
+        grid.appendChild(cell);
+      }
+    }
+
+    function highlightGrid(rows, cols) {
+      document.querySelectorAll(".cell").forEach(cell => {
+        const r = parseInt(cell.dataset.row);
+        const c = parseInt(cell.dataset.col);
+        if (r <= rows && c <= cols) {
+          cell.classList.add("selected");
+        } else {
+          cell.classList.remove("selected");
+        }
+      });
+    }
+
+    document.querySelectorAll("#thicknessOptions .color-button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#thicknessOptions .color-button").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+      });
+    });
 
     document.querySelectorAll("#bgColorOptions .color-button").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -130,9 +198,7 @@
     });
 
     function generate() {
-      const cols = parseInt(document.getElementById("cols").value);
-      const rows = parseInt(document.getElementById("rows").value);
-      const scale = parseFloat(document.getElementById("thickness").value);
+      const scale = parseFloat(document.querySelector("#thicknessOptions .selected").dataset.value);
 
       document.getElementById("config").style.display = "none";
       document.getElementById("viewer").style.display = "block";
@@ -145,13 +211,13 @@
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const crossWidth = canvas.width / cols;
-      const crossHeight = canvas.height / rows;
+      const crossWidth = canvas.width / selectedCols;
+      const crossHeight = canvas.height / selectedRows;
       const crossSize = Math.min(crossWidth, crossHeight) / 4 * scale;
 
       ctx.fillStyle = crossColor;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < selectedRows; r++) {
+        for (let c = 0; c < selectedCols; c++) {
           const cx = c * crossWidth + crossWidth / 2;
           const cy = r * crossHeight + crossHeight / 2;
           ctx.fillRect(cx - crossSize / 2, cy - crossSize * 1.5, crossSize, crossSize * 3);
@@ -159,17 +225,6 @@
         }
       }
     }
-
-    function goBack() {
-      document.getElementById("viewer").style.display = "none";
-      document.getElementById("config").style.display = "block";
-    }
-
-    document.addEventListener("touchstart", function(e) {
-      if (document.getElementById("viewer").style.display === "block") {
-        e.preventDefault();
-      }
-    }, { passive: false });
   </script>
 </body>
 </html>
