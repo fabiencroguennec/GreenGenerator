@@ -5,78 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Générateur de croix</title>
   <style>
-    :root {
-      --green: #04F404;
-      --blue: #150DF7;
-      --black: #000000;
-      --white: #ffffff;
-    }
     body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
+      margin: 0; padding: 0; height: 100%;
       font-family: 'Segoe UI', sans-serif;
-      background: var(--black);
-      color: var(--white);
+      background: black; color: white;
+      overflow: hidden;
     }
+
     #config {
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       background: rgba(255,255,255,0.05);
       backdrop-filter: blur(10px);
       border-radius: 16px;
-      padding: 30px;
-      width: 90%;
-      max-width: 500px;
+      padding: 30px; width: 90%; max-width: 500px;
       box-shadow: 0 0 15px rgba(0,0,0,0.5);
       z-index: 10;
     }
+
     h1 { text-align: center; }
+
     .option-label { margin: 15px 0 5px; font-weight: bold; }
+
     .color-options {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
+      display: flex; gap: 10px; margin-bottom: 10px;
     }
+
     .color-button {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 2px solid white;
-      cursor: pointer;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid white; cursor: pointer;
     }
+
     .color-button.selected {
-      box-shadow: 0 0 0 3px white;
-      transform: scale(1.1);
+      box-shadow: 0 0 0 3px white; transform: scale(1.1);
     }
+
     select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background: #222;
-      color: white;
+      width: 100%; padding: 10px; margin-top: 10px;
+      font-size: 16px; border: none; border-radius: 8px;
+      background: #222; color: white;
     }
+
     #viewer {
-      position: absolute;
-      top: 0; left: 0;
+      position: absolute; top: 0; left: 0;
       width: 100%; height: 100%;
-      touch-action: none;
-      display: none;
+      display: none; touch-action: none;
     }
+
+    #backButton {
+      position: absolute; top: 0; right: 0;
+      width: 100px; height: 100px;
+      z-index: 20;
+    }
+
     canvas {
       display: block;
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
     }
   </style>
 </head>
 <body>
+
   <div id="config">
     <h1>Générateur de Croix</h1>
 
@@ -95,16 +84,12 @@
     </div>
 
     <label for="cols">Colonnes :</label>
-    <select id="cols">
-      <option>1</option><option>2</option><option>3</option><option>4</option>
-      <option>5</option><option>6</option><option>7</option><option>8</option>
-    </select>
+    <select id="cols"><option>1</option><option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option><option>8</option></select>
 
     <label for="rows">Lignes :</label>
-    <select id="rows">
-      <option>1</option><option>2</option><option>3</option><option>4</option>
-      <option>5</option><option>6</option><option>7</option><option>8</option>
-    </select>
+    <select id="rows"><option>1</option><option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option><option>8</option></select>
 
     <label for="thickness">Épaisseur :</label>
     <select id="thickness">
@@ -116,7 +101,10 @@
     <button onclick="generate()">Afficher</button>
   </div>
 
-  <div id="viewer"><canvas id="canvas"></canvas></div>
+  <div id="viewer">
+    <canvas id="canvas"></canvas>
+    <div id="backButton" onclick="goBack()"></div>
+  </div>
 
   <script>
     let bgColor = "#000000";
@@ -144,8 +132,7 @@
       const scale = parseFloat(document.getElementById("thickness").value);
 
       document.getElementById("config").style.display = "none";
-      const viewer = document.getElementById("viewer");
-      viewer.style.display = "block";
+      document.getElementById("viewer").style.display = "block";
 
       const canvas = document.getElementById("canvas");
       canvas.width = window.innerWidth;
@@ -170,8 +157,15 @@
       }
     }
 
-    document.addEventListener('touchstart', e => {
-      if (document.getElementById("viewer").style.display === "block") e.preventDefault();
+    function goBack() {
+      document.getElementById("viewer").style.display = "none";
+      document.getElementById("config").style.display = "block";
+    }
+
+    document.addEventListener("touchstart", function(e) {
+      if (document.getElementById("viewer").style.display === "block") {
+        e.preventDefault();
+      }
     }, { passive: false });
   </script>
 </body>
