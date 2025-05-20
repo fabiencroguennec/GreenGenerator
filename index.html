@@ -120,7 +120,12 @@
       <option>5</option><option>6</option><option>7</option><option>8</option>
     </select>
 
-    
+    <label for="rows">Lignes :</label>
+    <select id="rows">
+      <option>1</option><option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option><option>8</option>
+    </select>
+
     <label for="thickness">Épaisseur de la croix :</label>
     <select id="thickness">
       <option value="0.5">Fine</option>
@@ -128,78 +133,35 @@
       <option value="1.5">Large</option>
     </select>
 
-    <label for="rows">Lignes :</label>
-    
-    <select id="rows">
-      <option>1</option><option>2</option><option>3</option><option>4</option>
-      <option>5</option><option>6</option><option>7</option><option>8</option>
-    </select>
-
     <button onclick="generate()">Afficher</button>
   </div>
 
   <div id="viewer">
     <canvas id="canvas"></canvas>
-  
-    <div id="backButton" onclick="goBack()" style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; z-index: 20;">
-    <div id="infoDisplay" style="position: absolute; top: 0; left: 0; padding: 10px; color: white; font-size: 14px; font-family: monospace; z-index: 15;">
-    <div id="downloadButton" onclick="downloadImage()" style="position: absolute; bottom: 10px; right: 10px; padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 10px; color: white; font-weight: bold; font-size: 14px; cursor: pointer; z-index: 15;">
-      Télécharger PNG
-    </div>
+  </div>
 
   <script>
-    function downloadImage() {
-      const canvas = document.getElementById("canvas");
-      const link = document.createElement('a');
-      
-      const now = new Date();
-      const bgColorText = document.getElementById("bgColor").options[document.getElementById("bgColor").selectedIndex].text.replace(/\s+/g, "");
-      const cols = document.getElementById("cols").value;
-      const rows = document.getElementById("rows").value;
-      const thickness = document.getElementById("thickness").options[document.getElementById("thickness").selectedIndex].text;
-      const dateString = now.toISOString().slice(0,19).replace(/[:T]/g, "-");
-      link.download = `croix_${bgColorText}_${cols}x${rows}_${thickness}_${dateString}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    }
-
-
-    function goBack() {
-      document.getElementById("viewer").style.display = "none";
-      document.getElementById("config").style.display = "block";
-    }
-
     function generate() {
-      const bgColorText = document.getElementById("bgColor").options[document.getElementById("bgColor").selectedIndex].text;
-      const cols = parseInt(document.getElementById("cols").value);
-      const rows = parseInt(document.getElementById("rows").value);
-      const thicknessText = document.getElementById("thickness").options[document.getElementById("thickness").selectedIndex].text;
-
-      document.getElementById("infoDisplay").innerText = `Fond : ${bgColorText}\nColonnes : ${cols} | Lignes : ${rows}\nÉpaisseur : ${thicknessText}`;
       const bgColor = document.getElementById("bgColor").value;
       const cols = parseInt(document.getElementById("cols").value);
       const rows = parseInt(document.getElementById("rows").value);
+      const scale = parseFloat(document.getElementById("thickness").value);
 
       document.getElementById("config").style.display = "none";
       const viewer = document.getElementById("viewer");
       viewer.style.display = "block";
-      const canvas = document.getElementById("canvas");
-      canvas.style.display = "block";
 
       const canvas = document.getElementById("canvas");
+      canvas.style.display = "block";
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       const ctx = canvas.getContext("2d");
-
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
 
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const crossWidth = canvas.width / cols;
       const crossHeight = canvas.height / rows;
-      const scale = parseFloat(document.getElementById("thickness").value);
       const crossSize = Math.min(crossWidth, crossHeight) / 4 * scale;
 
       ctx.fillStyle = (bgColor === "#000000") ? "white" : "blue";
